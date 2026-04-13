@@ -1,11 +1,12 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Image from 'next/image'
 import AddAccountForm from '@/components/AddAccountForm'
 
 const accountTypeLabel: Record<string, string> = {
   checking: 'Conta Corrente',
   savings: 'Poupança',
-  wallet: 'Carteira',
+  wallet: 'Carteira / Dinheiro',
   credit_card: 'Cartão de Crédito',
   investment: 'Investimento',
 }
@@ -43,7 +44,7 @@ export default async function CadastrosPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-[#9e3c00]">account_balance_wallet</span>
-              <h3 className="text-xl font-bold font-headline text-[#4a2507]">Contas</h3>
+              <h3 className="text-xl font-bold font-headline text-[#4a2507]">Minhas Contas</h3>
             </div>
             <div className="bg-orange-100 px-4 py-1.5 rounded-full">
               <span className="text-sm font-bold text-[#9e3c00]">
@@ -57,24 +58,56 @@ export default async function CadastrosPage() {
               {accounts.map((a) => (
                 <div
                   key={a.id}
-                  className="bg-white p-5 rounded-2xl flex items-center justify-between shadow-sm transition-transform hover:scale-[1.01]"
+                  className="bg-white p-5 rounded-2xl flex items-center gap-4 shadow-sm transition-transform hover:scale-[1.01]"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center text-[#9e3c00]">
-                      <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  {/* Avatar: imagem ou cor + ícone */}
+                  <div className="w-14 h-14 rounded-2xl overflow-hidden shrink-0 flex items-center justify-center"
+                    style={{ backgroundColor: a.image_url ? undefined : (a.color ?? '#9e3c00') + '20' }}
+                  >
+                    {a.image_url ? (
+                      <Image
+                        src={a.image_url}
+                        alt={a.name}
+                        width={56}
+                        height={56}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span
+                        className="material-symbols-outlined text-2xl"
+                        style={{ color: a.color ?? '#9e3c00', fontVariationSettings: "'FILL' 1" }}
+                      >
                         {accountTypeIcon[a.type] ?? 'account_balance'}
                       </span>
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-[#4a2507]">{a.name}</h4>
-                      <p className="text-xs text-[#805030]">{accountTypeLabel[a.type] ?? a.type}</p>
-                    </div>
+                    )}
                   </div>
-                  <div className="text-right">
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-bold text-[#4a2507] truncate">{a.name}</h4>
+                    <p className="text-xs text-[#805030] truncate">
+                      {[a.bank_name, accountTypeLabel[a.type]].filter(Boolean).join(' · ')}
+                    </p>
+                    {(a.agency || a.account_number) && (
+                      <p className="text-xs text-[#9e3c00]/70 mt-0.5">
+                        {a.agency ? `Ag. ${a.agency}` : ''}
+                        {a.agency && a.account_number ? ' · ' : ''}
+                        {a.account_number ? `Cc. ${a.account_number}` : ''}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Saldo */}
+                  <div className="text-right shrink-0">
                     <p className="font-extrabold font-headline text-[#4a2507]">
                       {Number(a.balance).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                     </p>
-                    <span className="text-[10px] uppercase tracking-widest font-bold text-[#9e3c00]">Ativa</span>
+                    <span
+                      className="text-[10px] uppercase tracking-widest font-bold"
+                      style={{ color: a.color ?? '#9e3c00' }}
+                    >
+                      Ativa
+                    </span>
                   </div>
                 </div>
               ))}
