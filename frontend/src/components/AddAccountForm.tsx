@@ -1,7 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import Image from 'next/image'
+import { useState, useRef, useActionState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { addAccount } from '@/app/(dashboard)/cadastros/actions'
 
@@ -24,6 +23,7 @@ export default function AddAccountForm({ userId }: { userId: string }) {
   const [selectedColor, setSelectedColor] = useState(COLORS[0])
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const formRef = useRef<HTMLFormElement>(null)
 
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -33,61 +33,90 @@ export default function AddAccountForm({ userId }: { userId: string }) {
       return
     }
     setImageFile(file)
+    // Use plain img tag friendly URL
     setImagePreview(URL.createObjectURL(file))
     setError(null)
   }
 
-  async function handleSubmit(formData: FormData) {
+  function removeImage() {
+    setImageFile(null)
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview)
+      setImagePreview(null)
+    }
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
     setPending(true)
     setError(null)
 
     try {
-      let imageUrl = ''
+      const formData = new FormData(e.currentTarget)
 
+      // Upload image if selected
       if (imageFile) {
         const supabase = createClient()
         const ext = imageFile.name.split('.').pop()
         const path = `${userId}/${Date.now()}.${ext}`
-        const { data, error: uploadError } = await supabase.storage
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
           .from('account-images')
           .upload(path, imageFile, { upsert: true })
 
         if (uploadError) {
-          setError('Erro ao enviar imagem. Tente novamente.')
+          setError(`Erro ao enviar imagem: ${uploadError.message}`)
           setPending(false)
           return
         }
 
         const { data: { publicUrl } } = supabase.storage
           .from('account-images')
-          .getPublicUrl(data.path)
-        imageUrl = publicUrl
+          .getPublicUrl(uploadData.path)
+
+        formData.set('image_url', publicUrl)
+      } else {
+        formData.set('image_url', '')
       }
 
-      formData.set('image_url', imageUrl)
       formData.set('color', selectedColor)
+
       await addAccount(formData)
-    } catch {
-      setError('Ocorreu um erro. Tente novamente.')
+      // If redirect didn't fire (e.g. validation failed silently), reset manually
+      formRef.current?.reset()
+      removeImage()
+      setSelectedColor(COLORS[0])
+    } catch (err: unknown) {
+      // next/navigation redirect throws — let it propagate
+      if (err instanceof Error && err.message === 'NEXT_REDIRECT') throw err
+      setError('Ocorreu um erro ao criar a conta. Tente novamente.')
       setPending(false)
     }
   }
 
   return (
-    <form action={handleSubmit} className="bg-white rounded-2xl p-6 shadow-sm space-y-6">
-
+    <form
+      ref={formRef}
+      onSubmit={handleSubmit}
+      className="bg-white rounded-2xl p-6 shadow-sm space-y-6"
+    >
       {/* Imagem + Cor */}
       <div className="space-y-3">
-        <label className="block text-sm font-semibold text-[#805030]">Imagem de identificação</label>
+        <label className="block text-sm font-semibold text-[#805030]">
+          Imagem de identificação <span className="font-normal text-[#805030]/60">(opcional)</span>
+        </label>
         <div className="flex items-center gap-5">
-          {/* Preview */}
+          {/* Preview button */}
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-dashed border-orange-200 flex items-center justify-center bg-orange-50 hover:bg-orange-100 transition-colors shrink-0"
           >
             {imagePreview ? (
-              <Image src={imagePreview} alt="Preview" width={80} height={80} className="w-full h-full object-cover" />
+              /* Plain <img> for blob: URLs — next/image doesn't support blob: */
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
             ) : (
               <div className="flex flex-col items-center gap-1 text-[#805030]">
                 <span className="material-symbols-outlined text-2xl">add_photo_alternate</span>
@@ -95,34 +124,41 @@ export default function AddAccountForm({ userId }: { userId: string }) {
               </div>
             )}
           </button>
+
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/png,image/jpeg,image/webp"
             className="hidden"
             onChange={handleImageChange}
           />
 
-          {/* Cores */}
+          {/* Cor */}
           <div className="flex-1 space-y-2">
-            <p className="text-xs font-semibold text-[#805030]">Ou escolha uma cor</p>
+            <p className="text-xs font-semibold text-[#805030]">Cor de identificação</p>
             <div className="flex flex-wrap gap-2">
               {COLORS.map(c => (
                 <button
                   key={c}
                   type="button"
                   onClick={() => setSelectedColor(c)}
-                  className={`w-8 h-8 rounded-full transition-transform ${selectedColor === c ? 'scale-125 ring-2 ring-offset-2 ring-[#9e3c00]' : 'hover:scale-110'}`}
+                  className={`w-8 h-8 rounded-full transition-transform ${
+                    selectedColor === c
+                      ? 'scale-125 ring-2 ring-offset-2 ring-[#9e3c00]'
+                      : 'hover:scale-110'
+                  }`}
                   style={{ backgroundColor: c }}
+                  aria-label={`Cor ${c}`}
                 />
               ))}
             </div>
           </div>
         </div>
+
         {imagePreview && (
           <button
             type="button"
-            onClick={() => { setImageFile(null); setImagePreview(null) }}
+            onClick={removeImage}
             className="text-xs text-[#b31b25] font-semibold hover:underline"
           >
             Remover imagem
@@ -133,7 +169,9 @@ export default function AddAccountForm({ userId }: { userId: string }) {
       {/* Nome + Banco */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div className="space-y-1.5">
-          <label className="block text-sm font-semibold text-[#805030]">Nome que uso para a conta</label>
+          <label className="block text-sm font-semibold text-[#805030]">
+            Nome que uso para a conta
+          </label>
           <input
             name="name"
             type="text"
@@ -170,7 +208,7 @@ export default function AddAccountForm({ userId }: { userId: string }) {
         </select>
       </div>
 
-      {/* Agência + Número da conta */}
+      {/* Agência + Número */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div className="space-y-1.5">
           <label className="block text-sm font-semibold text-[#805030]">Agência</label>
@@ -209,15 +247,28 @@ export default function AddAccountForm({ userId }: { userId: string }) {
       </div>
 
       {error && (
-        <p className="text-sm text-[#b31b25] font-medium">{error}</p>
+        <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+          <span className="material-symbols-outlined text-[#b31b25] text-lg">error</span>
+          <p className="text-sm text-[#b31b25] font-medium">{error}</p>
+        </div>
       )}
 
       <button
         type="submit"
         disabled={pending}
-        className="w-full bg-gradient-to-r from-[#9e3c00] to-[#ff7936] text-white font-headline font-bold py-3.5 rounded-xl shadow-sm hover:opacity-90 disabled:opacity-50 transition-all"
+        className="w-full bg-gradient-to-r from-[#9e3c00] to-[#ff7936] text-white font-headline font-bold py-3.5 rounded-xl shadow-sm hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
       >
-        {pending ? 'Criando...' : 'Criar Conta'}
+        {pending ? (
+          <>
+            <span className="material-symbols-outlined text-lg animate-spin">progress_activity</span>
+            Criando...
+          </>
+        ) : (
+          <>
+            <span className="material-symbols-outlined text-lg">add</span>
+            Criar Conta
+          </>
+        )}
       </button>
     </form>
   )
