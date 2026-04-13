@@ -252,23 +252,33 @@ export default function AddAccountForm({ userId }: { userId: string }) {
         </div>
       )}
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="w-full bg-gradient-to-r from-[#9e3c00] to-[#ff7936] text-white font-headline font-bold py-3.5 rounded-xl shadow-sm hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
-      >
-        {pending ? (
-          <>
-            <span className="material-symbols-outlined text-lg animate-spin">progress_activity</span>
-            Criando...
-          </>
-        ) : (
-          <>
-            <span className="material-symbols-outlined text-lg">add</span>
-            Criar Conta
-          </>
-        )}
-      </button>
+      <div className="flex gap-3">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          disabled={pending}
+          className="flex-1 border border-orange-200 text-[#805030] font-headline font-bold py-3.5 rounded-xl hover:bg-orange-50 disabled:opacity-50 transition-all"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          disabled={pending}
+          className="flex-[2] bg-gradient-to-r from-[#9e3c00] to-[#ff7936] text-white font-headline font-bold py-3.5 rounded-xl shadow-sm hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+        >
+          {pending ? (
+            <>
+              <span className="material-symbols-outlined text-lg animate-spin">progress_activity</span>
+              Criando...
+            </>
+          ) : (
+            <>
+              <span className="material-symbols-outlined text-lg">add</span>
+              Criar Conta
+            </>
+          )}
+        </button>
+      </div>
     </form>
   )
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { addTransaction } from '@/app/(dashboard)/adicionar/actions'
 
 type Account = { id: string; name: string; type: string }
@@ -13,6 +14,7 @@ export default function AddTransactionForm({
   accounts: Account[]
   categories: Category[]
 }) {
+  const router = useRouter()
   const [txType, setTxType] = useState<'expense' | 'income'>('expense')
   const [pending, setPending] = useState(false)
 
@@ -133,13 +135,23 @@ export default function AddTransactionForm({
           </div>
         </div>
 
-        <button
-          type="submit"
-          disabled={pending}
-          className="w-full bg-gradient-to-r from-[#9e3c00] to-[#ff7936] text-white font-headline font-bold py-4 rounded-xl shadow-lg hover:opacity-90 disabled:opacity-50 transition-all"
-        >
-          {pending ? 'Salvando...' : 'Salvar Transação'}
-        </button>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            disabled={pending}
+            className="flex-1 border border-orange-200 text-[#805030] font-headline font-bold py-4 rounded-xl hover:bg-orange-50 disabled:opacity-50 transition-all"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            disabled={pending}
+            className="flex-[2] bg-gradient-to-r from-[#9e3c00] to-[#ff7936] text-white font-headline font-bold py-4 rounded-xl shadow-lg hover:opacity-90 disabled:opacity-50 transition-all"
+          >
+            {pending ? 'Salvando...' : 'Salvar Transação'}
+          </button>
+        </div>
       </form>
     </div>
   )
