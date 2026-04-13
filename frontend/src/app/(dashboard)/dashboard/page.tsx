@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
+import FabMenu from '@/components/FabMenu'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -128,12 +129,7 @@ export default async function DashboardPage() {
       </section>
 
       {/* FAB */}
-      <Link
-        href="/adicionar"
-        className="fixed right-6 bottom-32 w-16 h-16 rounded-2xl bg-gradient-to-br from-[#9e3c00] to-[#ff7936] text-[#fff0ea] shadow-[0px_12px_32px_rgba(74,37,7,0.25)] flex items-center justify-center transition-transform active:scale-90 z-40"
-      >
-        <span className="material-symbols-outlined text-3xl">add</span>
-      </Link>
+      <FabMenu />
     </main>
   )
 }
