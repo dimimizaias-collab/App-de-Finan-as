@@ -38,3 +38,6 @@ coverage/
 
 # Stitch screens (generated assets)
 stitch-screens/
+
+# Claude Code internal files
+.claude/
