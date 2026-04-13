@@ -121,7 +121,7 @@ export default async function CadastrosPage() {
         </section>
 
         {/* Formulário nova conta */}
-        <section className="space-y-4">
+        <section id="nova-conta" className="space-y-4">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-[#9e3c00]">add_circle</span>
             <h3 className="text-xl font-bold font-headline text-[#4a2507]">Nova Conta</h3>

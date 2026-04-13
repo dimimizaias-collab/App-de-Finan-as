@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useRef, useActionState } from 'react'
+import { useState, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { addAccount } from '@/app/(dashboard)/cadastros/actions'
 
@@ -17,6 +18,7 @@ const COLORS = [
 ]
 
 export default function AddAccountForm({ userId }: { userId: string }) {
+  const router = useRouter()
   const [pending, setPending] = useState(false)
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -33,17 +35,14 @@ export default function AddAccountForm({ userId }: { userId: string }) {
       return
     }
     setImageFile(file)
-    // Use plain img tag friendly URL
     setImagePreview(URL.createObjectURL(file))
     setError(null)
   }
 
   function removeImage() {
     setImageFile(null)
-    if (imagePreview) {
-      URL.revokeObjectURL(imagePreview)
-      setImagePreview(null)
-    }
+    if (imagePreview) URL.revokeObjectURL(imagePreview)
+    setImagePreview(null)
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
@@ -55,7 +54,7 @@ export default function AddAccountForm({ userId }: { userId: string }) {
     try {
       const formData = new FormData(e.currentTarget)
 
-      // Upload image if selected
+      // Upload imagem se selecionada
       if (imageFile) {
         const supabase = createClient()
         const ext = imageFile.name.split('.').pop()
@@ -82,15 +81,18 @@ export default function AddAccountForm({ userId }: { userId: string }) {
 
       formData.set('color', selectedColor)
 
-      await addAccount(formData)
-      // If redirect didn't fire (e.g. validation failed silently), reset manually
-      formRef.current?.reset()
-      removeImage()
-      setSelectedColor(COLORS[0])
+      const result = await addAccount(formData)
+
+      if (result?.success) {
+        formRef.current?.reset()
+        removeImage()
+        setSelectedColor(COLORS[0])
+        router.push('/cadastros')
+        router.refresh()
+      }
     } catch (err: unknown) {
-      // next/navigation redirect throws — let it propagate
-      if (err instanceof Error && err.message === 'NEXT_REDIRECT') throw err
-      setError('Ocorreu um erro ao criar a conta. Tente novamente.')
+      const msg = err instanceof Error ? err.message : 'Erro desconhecido'
+      setError(`Erro ao criar conta: ${msg}`)
       setPending(false)
     }
   }
@@ -104,17 +106,16 @@ export default function AddAccountForm({ userId }: { userId: string }) {
       {/* Imagem + Cor */}
       <div className="space-y-3">
         <label className="block text-sm font-semibold text-[#805030]">
-          Imagem de identificação <span className="font-normal text-[#805030]/60">(opcional)</span>
+          Imagem de identificação{' '}
+          <span className="font-normal text-[#805030]/60">(opcional)</span>
         </label>
         <div className="flex items-center gap-5">
-          {/* Preview button */}
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-dashed border-orange-200 flex items-center justify-center bg-orange-50 hover:bg-orange-100 transition-colors shrink-0"
           >
             {imagePreview ? (
-              /* Plain <img> for blob: URLs — next/image doesn't support blob: */
               // eslint-disable-next-line @next/next/no-img-element
               <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
             ) : (
@@ -124,7 +125,6 @@ export default function AddAccountForm({ userId }: { userId: string }) {
               </div>
             )}
           </button>
-
           <input
             ref={fileInputRef}
             type="file"
@@ -133,7 +133,6 @@ export default function AddAccountForm({ userId }: { userId: string }) {
             onChange={handleImageChange}
           />
 
-          {/* Cor */}
           <div className="flex-1 space-y-2">
             <p className="text-xs font-semibold text-[#805030]">Cor de identificação</p>
             <div className="flex flex-wrap gap-2">
@@ -247,8 +246,8 @@ export default function AddAccountForm({ userId }: { userId: string }) {
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-          <span className="material-symbols-outlined text-[#b31b25] text-lg">error</span>
+        <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+          <span className="material-symbols-outlined text-[#b31b25] text-lg shrink-0 mt-0.5">error</span>
           <p className="text-sm text-[#b31b25] font-medium">{error}</p>
         </div>
       )}

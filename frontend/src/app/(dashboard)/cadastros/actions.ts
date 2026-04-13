@@ -1,12 +1,12 @@
 'use server'
 
-import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 
 export async function addAccount(formData: FormData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  if (!user) throw new Error('Não autenticado')
 
   const name = formData.get('name') as string
   const type = formData.get('type') as string
@@ -17,9 +17,15 @@ export async function addAccount(formData: FormData) {
   const color = formData.get('color') as string
   const balance = parseFloat(formData.get('balance') as string) || 0
 
-  if (!name || !type) return
+  if (!name || !type) throw new Error('Nome e tipo são obrigatórios')
 
-  await supabase.from('accounts').insert({
+  // Garante que o perfil existe antes de inserir a conta
+  await supabase.from('profiles').upsert(
+    { id: user.id },
+    { onConflict: 'id', ignoreDuplicates: true }
+  )
+
+  const { error } = await supabase.from('accounts').insert({
     user_id: user.id,
     name,
     type,
@@ -31,5 +37,11 @@ export async function addAccount(formData: FormData) {
     balance,
   })
 
-  redirect('/cadastros')
+  if (error) throw new Error(error.message)
+
+  revalidatePath('/cadastros')
+  revalidatePath('/adicionar')
+  revalidatePath('/dashboard')
+
+  return { success: true }
 }

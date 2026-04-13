@@ -1,9 +1,14 @@
 import { createClient } from '@/lib/supabase/server'
 import AddTransactionForm from '@/components/AddTransactionForm'
-import Link from 'next/link'
+import AddAccountForm from '@/components/AddAccountForm'
 
 export default async function AdicionarPage() {
   const supabase = await createClient()
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+
+  if (userError || !user) {
+    return <div>Erro de autenticação. Por favor, faça login novamente.</div>
+  }
 
   const [{ data: accounts }, { data: categories }] = await Promise.all([
     supabase.from('accounts').select('id, name, type').order('name'),
@@ -23,17 +28,19 @@ export default async function AdicionarPage() {
           categories={categories ?? []}
         />
       ) : (
-        <div className="p-10 bg-white rounded-3xl text-center shadow-sm">
-          <span className="material-symbols-outlined text-5xl text-[#dca079] block mb-3">account_balance_wallet</span>
-          <p className="font-bold text-[#4a2507] mb-1">Nenhuma conta cadastrada</p>
-          <p className="text-sm text-[#805030] mb-5">Crie uma conta antes de adicionar transações.</p>
-          <Link
-            href="/cadastros"
-            className="inline-flex items-center gap-2 bg-[#9e3c00] text-white text-sm font-bold px-5 py-2.5 rounded-xl"
-          >
-            <span className="material-symbols-outlined text-lg">add</span>
-            Criar conta
-          </Link>
+        <div className="space-y-6">
+          <div className="p-8 bg-white rounded-3xl text-center shadow-sm">
+            <span className="material-symbols-outlined text-5xl text-[#dca079] block mb-3">account_balance_wallet</span>
+            <p className="font-bold text-[#4a2507] mb-1">Nenhuma conta cadastrada</p>
+            <p className="text-sm text-[#805030]">Crie uma conta abaixo antes de adicionar transações.</p>
+          </div>
+          <div>
+            <h3 className="text-xl font-bold font-headline text-[#4a2507] mb-4 flex items-center gap-2">
+              <span className="material-symbols-outlined text-[#9e3c00]">add_circle</span>
+              Nova Conta
+            </h3>
+            <AddAccountForm userId={user.id} />
+          </div>
         </div>
       )}
     </main>
