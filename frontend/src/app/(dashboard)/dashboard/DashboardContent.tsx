@@ -28,7 +28,7 @@ export default function DashboardContent({
     ? initialAccounts.filter(a => a.id === selectedAccountId)
     : initialAccounts
 
-  const totalBalance = accountsToDisplay.reduce((sum, acc) => sum + Number(acc.balance), 0)
+  const totalBalance = accountsToDisplay.reduce((sum: number, acc: any) => sum + Number(acc.balance), 0)
 
   // Transactions are global for now, or filtered if we want
   const transactions = initialTransactions

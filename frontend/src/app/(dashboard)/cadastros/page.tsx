@@ -29,7 +29,7 @@ export default async function CadastrosPage() {
     .select('*')
     .order('created_at', { ascending: true })
 
-  const total = accounts?.reduce((sum, a) => sum + Number(a.balance), 0) ?? 0
+  const total = accounts?.reduce((sum: number, a: any) => sum + Number(a.balance), 0) ?? 0
 
   return (
     <main className="pt-20 pb-32 px-6 max-w-3xl mx-auto">
