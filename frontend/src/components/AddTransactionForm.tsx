@@ -120,7 +120,7 @@ export default function AddTransactionForm({
               className="w-full border border-orange-200 rounded-xl py-3 px-4 text-[#4a2507] focus:outline-none focus:ring-2 focus:ring-[#9e3c00]/30 appearance-none bg-white"
             >
               <option value="">Sem categoria</option>
-              {filteredCategories.map(c => (
+              {filteredCategories.map((c: any) => (
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}
             </select>
@@ -145,7 +145,7 @@ export default function AddTransactionForm({
                 className="w-full border border-orange-200 rounded-xl py-3 px-4 text-[#4a2507] focus:outline-none focus:ring-2 focus:ring-[#9e3c00]/30 appearance-none bg-white"
               >
                 <option value="">Selecione uma conta</option>
-                {accounts.map(a => (
+                {accounts.map((a: any) => (
                   <option key={a.id} value={a.id}>{a.name}</option>
                 ))}
               </select>

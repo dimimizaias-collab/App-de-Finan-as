@@ -60,7 +60,7 @@ export default async function TimelinePage() {
         </div>
       ) : (
         <section className="space-y-8">
-          {Object.entries(grouped).map(([date, txs]) => (
+          {Object.entries(grouped).map(([date, txs]: [string, Transaction[]]) => (
             <div key={date}>
               <div className="sticky top-16 py-3 bg-[#fff4f0] z-10">
                 <h3 className="text-[#805030] font-bold tracking-wide text-xs uppercase">
@@ -68,7 +68,7 @@ export default async function TimelinePage() {
                 </h3>
               </div>
               <div className="space-y-3">
-                {txs.map((t) => {
+                {txs.map((t: Transaction) => {
                   const isIncome = t.type === 'income'
                   return (
                     <div

@@ -67,7 +67,7 @@ export default function DashboardContent({
         {/* Left Column: Bank Cards */}
         <div className="lg:col-span-8 space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {accountsToDisplay.map((acc) => (
+            {accountsToDisplay.map((acc: any) => (
               <BankCard 
                 key={acc.id}
                 name={acc.name}
@@ -85,7 +85,7 @@ export default function DashboardContent({
             </div>
 
             <div className="space-y-4">
-              {transactions.map((t) => {
+              {transactions.map((t: any) => {
                 const isIncome = t.type === 'income'
                 return (
                   <div key={t.id} className="flex items-center justify-between p-6 bg-surface-container-low/50 hover:bg-surface-container-high transition-colors rounded-2xl group">

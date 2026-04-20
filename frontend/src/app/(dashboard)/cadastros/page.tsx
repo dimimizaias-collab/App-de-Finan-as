@@ -55,7 +55,7 @@ export default async function CadastrosPage() {
 
           {accounts && accounts.length > 0 ? (
             <div className="space-y-3">
-              {accounts.map((a) => (
+              {accounts.map((a: any) => (
                 <div
                   key={a.id}
                   className="bg-white p-5 rounded-2xl flex items-center gap-4 shadow-sm transition-transform hover:scale-[1.01]"

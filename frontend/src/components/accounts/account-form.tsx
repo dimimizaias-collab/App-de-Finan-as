@@ -143,7 +143,7 @@ export default function AccountForm({ userId }: { userId: string }) {
           <div className="flex-1 space-y-2">
             <p className="text-xs font-semibold text-[#805030]">Cor de identificação</p>
             <div className="flex flex-wrap gap-2">
-              {COLORS.map(c => (
+              {COLORS.map((c: string) => (
                 <button
                   key={c}
                   type="button"
@@ -193,7 +193,7 @@ export default function AccountForm({ userId }: { userId: string }) {
             className="w-full border border-orange-200 rounded-xl py-3 px-4 text-[#4a2507] focus:outline-none focus:ring-2 focus:ring-[#9e3c00]/30 appearance-none bg-white"
           >
             <option value="">Selecione o banco</option>
-            {BANKS.map(b => <option key={b} value={b}>{b}</option>)}
+            {BANKS.map((b: string) => <option key={b} value={b}>{b}</option>)}
           </select>
         </div>
       </div>
