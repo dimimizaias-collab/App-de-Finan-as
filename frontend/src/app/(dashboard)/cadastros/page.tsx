@@ -66,12 +66,11 @@ export default async function CadastrosPage() {
                     style={{ backgroundColor: a.image_url ? undefined : (a.color ?? '#9e3c00') + '20' }}
                   >
                     {a.image_url ? (
-                      <Image
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
                         src={a.image_url}
                         alt={a.name}
-                        width={56}
-                        height={56}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover rounded-2xl"
                       />
                     ) : (
                       <span

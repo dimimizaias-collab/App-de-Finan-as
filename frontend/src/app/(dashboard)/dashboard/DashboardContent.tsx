@@ -4,7 +4,17 @@ import { useState } from 'react'
 import AccountSelector from '@/components/dashboard/AccountSelector'
 import BankCard from '@/components/dashboard/BankCard'
 import InsightsCard from '@/components/dashboard/InsightsCard'
-import { TrendingUp, TrendingDown, ReceiptText } from 'lucide-react'
+import { 
+  ArrowUpRight, 
+  ArrowDownRight, 
+  Receipt,
+  Plus,
+  Filter,
+  Search,
+  TrendingUp, 
+  TrendingDown, 
+  ReceiptText 
+} from 'lucide-react'
 import Link from 'next/link'
 
 interface DashboardContentProps {
@@ -91,16 +101,18 @@ export default function DashboardContent({
                 return (
                   <div key={t.id} className="flex items-center justify-between p-6 bg-surface-container-low/50 hover:bg-surface-container-high transition-colors rounded-2xl group">
                     <div className="flex items-center gap-5">
-                      <div className={`p-3 rounded-xl ${isIncome ? 'bg-success/10 text-emerald-600' : 'bg-on-surface-variant/10 text-on-surface-variant'}`}>
-                         <ReceiptText size={20} />
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
+                          isIncome ? 'bg-success/10 text-emerald-600' : 'bg-error/10 text-rose-600'
+                        }`}>
+                          <Receipt size={20} />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-bold text-on-surface">{t.description || 'Transação'}</h4>
+                          <p className="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant/50 mt-1">
+                            {t.date ? new Date(t.date).toLocaleDateString('pt-BR') : 'Sem data'} · {t.categories?.name || 'Sem categoria'}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="text-sm font-bold text-on-surface">{t.description || 'Transação'}</h4>
-                        <p className="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant/50 mt-1">
-                          {t.date ? new Date(t.date).toLocaleDateString('pt-BR') : 'Sem data'} · {t.categories?.name || 'Sem categoria'}
-                        </p>
-                      </div>
-                    </div>
                     <div className={`text-sm font-bold tabular-nums ${isIncome ? 'text-emerald-600' : 'text-on-surface'}`}>
                       {isIncome ? '+' : '-'} {Number(t.amount).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                     </div>
