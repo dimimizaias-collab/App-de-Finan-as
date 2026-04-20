@@ -19,11 +19,18 @@ export async function addAccount(formData: FormData) {
 
   if (!name || !type) throw new Error('Nome e tipo são obrigatórios')
 
+  console.log(`[addAccount] Iniciando criação de conta para o usuário: ${user.id}`)
+
   // Garante que o perfil existe antes de inserir a conta
-  await supabase.from('profiles').upsert(
+  const { error: profileError } = await supabase.from('profiles').upsert(
     { id: user.id },
     { onConflict: 'id', ignoreDuplicates: true }
   )
+
+  if (profileError) {
+    console.error(`[addAccount] Erro ao criar/atualizar perfil: ${profileError.message}`)
+    throw new Error(`Erro ao preparar perfil de usuário: ${profileError.message}`)
+  }
 
   const { error } = await supabase.from('accounts').insert({
     user_id: user.id,
@@ -37,7 +44,12 @@ export async function addAccount(formData: FormData) {
     balance,
   })
 
-  if (error) throw new Error(error.message)
+  if (error) {
+    console.error(`[addAccount] Erro ao inserir conta no banco: ${error.message}`)
+    throw new Error(`Erro de banco de dados ao salvar a conta: ${error.message}`)
+  }
+
+  console.log(`[addAccount] Conta criada com sucesso para o usuário: ${user.id}`)
 
   revalidatePath('/cadastros')
   revalidatePath('/adicionar')

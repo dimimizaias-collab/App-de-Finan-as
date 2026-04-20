@@ -8,9 +8,7 @@ export async function createClient() {
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseKey) {
-    console.warn('Supabase credentials missing. Returning null client.')
-    // This will likely fail downstream if called, but prevents hard crash during build-time checks if dynamic is not forced.
-    return null as any
+    throw new Error('Supabase credentials missing. Please check your environment variables (NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY).')
   }
 
   return createServerClient(
