@@ -21,7 +21,8 @@ const accountTypeIcon: Record<string, string> = {
 
 export default async function CadastrosPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: authData } = await supabase.auth.getUser()
+  const user = authData?.user
   if (!user) redirect('/login')
 
   const { data: accounts } = await supabase
@@ -48,7 +49,7 @@ export default async function CadastrosPage() {
             </div>
             <div className="bg-orange-100 px-4 py-1.5 rounded-full">
               <span className="text-sm font-bold text-[#9e3c00]">
-                {total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                {(total || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
               </span>
             </div>
           </div>
@@ -100,7 +101,7 @@ export default async function CadastrosPage() {
                   {/* Saldo */}
                   <div className="text-right shrink-0">
                     <p className="font-extrabold font-headline text-[#4a2507]">
-                      {Number(a.balance).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      {Number(a.balance || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                     </p>
                     <span
                       className="text-[10px] uppercase tracking-widest font-bold"

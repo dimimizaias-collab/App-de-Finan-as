@@ -83,7 +83,7 @@ export default function AccountForm({ userId }: { userId: string }) {
 
         formData.set('image_url', publicUrl)
       } else {
-        formData.set('image_url', '')
+        // Não define image_url se estiver vazio para que o servidor use null
       }
 
       formData.set('color', selectedColor)

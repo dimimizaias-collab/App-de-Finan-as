@@ -87,6 +87,7 @@ export default function DashboardContent({
             <div className="space-y-4">
               {transactions.map((t: any) => {
                 const isIncome = t.type === 'income'
+                // Não define image_url se estiver vazio para que o servidor use null
                 return (
                   <div key={t.id} className="flex items-center justify-between p-6 bg-surface-container-low/50 hover:bg-surface-container-high transition-colors rounded-2xl group">
                     <div className="flex items-center gap-5">
@@ -96,7 +97,7 @@ export default function DashboardContent({
                       <div>
                         <h4 className="text-sm font-bold text-on-surface">{t.description || 'Transação'}</h4>
                         <p className="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant/50 mt-1">
-                          {new Date(t.date).toLocaleDateString('pt-BR')} · {t.categories?.name}
+                          {t.date ? new Date(t.date).toLocaleDateString('pt-BR') : 'Sem data'} · {t.categories?.name || 'Sem categoria'}
                         </p>
                       </div>
                     </div>
