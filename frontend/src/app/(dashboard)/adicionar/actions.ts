@@ -15,9 +15,11 @@ export async function addTransaction(formData: FormData) {
   const category_id = formData.get('category_id') as string
   const account_id = formData.get('account_id') as string
 
-  if (!amount || !type || !date || !account_id) return
+  if (!amount || !type || !date || !account_id) {
+    throw new Error('Preencha os campos obrigatórios (valor, tipo, data e conta)')
+  }
 
-  await supabase.from('transactions').insert({
+  const { error } = await supabase.from('transactions').insert({
     user_id: user.id,
     account_id,
     category_id: category_id || null,
@@ -27,6 +29,11 @@ export async function addTransaction(formData: FormData) {
     date,
     is_paid: true,
   })
+
+  if (error) {
+    console.error('Erro ao adicionar transação:', error)
+    throw new Error(`Erro no banco: ${error.message}`)
+  }
 
   redirect('/timeline')
 }

@@ -17,15 +17,20 @@ export default function AddTransactionForm({
   const router = useRouter()
   const [txType, setTxType] = useState<'expense' | 'income'>('expense')
   const [pending, setPending] = useState(false)
-
+  const [error, setError] = useState<string | null>(null)
   const filteredCategories = categories.filter(c => c.type === txType)
   const today = new Date().toISOString().slice(0, 10)
 
   async function handleSubmit(formData: FormData) {
     setPending(true)
+    setError(null)
     formData.set('type', txType)
-    await addTransaction(formData)
-    setPending(false)
+    try {
+      await addTransaction(formData)
+    } catch (err: any) {
+      setError(err.message || 'Erro ao salvar transação')
+      setPending(false)
+    }
   }
 
   return (
@@ -122,18 +127,38 @@ export default function AddTransactionForm({
           </div>
           <div className="space-y-1.5">
             <label className="block text-sm font-semibold text-[#805030]">Conta</label>
-            <select
-              name="account_id"
-              required
-              className="w-full border border-orange-200 rounded-xl py-3 px-4 text-[#4a2507] focus:outline-none focus:ring-2 focus:ring-[#9e3c00]/30 appearance-none bg-white"
-            >
-              <option value="">Selecione uma conta</option>
-              {accounts.map(a => (
-                <option key={a.id} value={a.id}>{a.name}</option>
-              ))}
-            </select>
+            {accounts.length === 0 ? (
+              <div className="bg-orange-50 p-3 rounded-xl border border-orange-100 flex items-center justify-between">
+                <span className="text-xs text-[#805030] font-medium">Nenhuma conta cadastrada</span>
+                <button
+                  type="button"
+                  onClick={() => router.push('/cadastros#nova-conta')}
+                  className="text-xs text-[#9e3c00] font-bold underline"
+                >
+                  Criar Agora
+                </button>
+              </div>
+            ) : (
+              <select
+                name="account_id"
+                required
+                className="w-full border border-orange-200 rounded-xl py-3 px-4 text-[#4a2507] focus:outline-none focus:ring-2 focus:ring-[#9e3c00]/30 appearance-none bg-white"
+              >
+                <option value="">Selecione uma conta</option>
+                {accounts.map(a => (
+                  <option key={a.id} value={a.id}>{a.name}</option>
+                ))}
+              </select>
+            )}
           </div>
         </div>
+
+        {error && (
+          <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+            <span className="material-symbols-outlined text-[#b31b25] text-lg shrink-0 mt-0.5">error</span>
+            <p className="text-sm text-[#b31b25] font-medium">{error}</p>
+          </div>
+        )}
 
         <div className="flex gap-3">
           <button

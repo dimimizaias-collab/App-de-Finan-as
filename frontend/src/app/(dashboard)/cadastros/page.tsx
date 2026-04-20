@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Image from 'next/image'
-import AddAccountForm from '@/components/AddAccountForm'
+import AccountForm from '@/components/accounts/account-form'
 
 const accountTypeLabel: Record<string, string> = {
   checking: 'Conta Corrente',
@@ -126,7 +126,7 @@ export default async function CadastrosPage() {
             <span className="material-symbols-outlined text-[#9e3c00]">add_circle</span>
             <h3 className="text-xl font-bold font-headline text-[#4a2507]">Nova Conta</h3>
           </div>
-          <AddAccountForm userId={user.id} />
+          <AccountForm userId={user.id} />
         </section>
       </div>
     </main>

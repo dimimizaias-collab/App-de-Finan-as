@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import AddTransactionForm from '@/components/AddTransactionForm'
-import AddAccountForm from '@/components/AddAccountForm'
+import AccountForm from '@/components/accounts/account-form'
 
 type Account = { id: string; name: string; type: string }
 type Category = { id: string; name: string; type: string }
@@ -67,7 +67,7 @@ export default function AdicionarTabs({
           </div>
         )
       ) : (
-        <AddAccountForm userId={userId} />
+        <AccountForm userId={userId} />
       )}
     </div>
   )

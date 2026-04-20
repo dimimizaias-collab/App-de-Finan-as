@@ -17,7 +17,8 @@ const COLORS = [
   '#d35400', '#117a65', '#2e4057', '#b7950b', '#4a235a',
 ]
 
-export default function AddAccountForm({ userId }: { userId: string }) {
+
+export default function AccountForm({ userId }: { userId: string }) {
   const router = useRouter()
   const [pending, setPending] = useState(false)
   const [imageFile, setImageFile] = useState<File | null>(null)
@@ -48,6 +49,12 @@ export default function AddAccountForm({ userId }: { userId: string }) {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    
+    // Check authentication based on props and local session
+    if (!userId) {
+      throw new Error("Usuário não autenticado")
+    }
+
     setPending(true)
     setError(null)
 

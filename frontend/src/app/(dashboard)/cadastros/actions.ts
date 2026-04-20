@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 export async function addAccount(formData: FormData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Não autenticado')
+  if (!user) throw new Error('Usuário não autenticado')
 
   const name = formData.get('name') as string
   const type = formData.get('type') as string
